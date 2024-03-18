@@ -1,1 +1,1 @@
-web: ./build/install/cs346-server/bin/cs346-server
+web: ./build/install/cs346-server/bin/waitless-server
