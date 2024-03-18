@@ -1,1 +1,1 @@
-rootProject.name = "com.example.waitless-server"
+rootProject.name = "waitless-server"
