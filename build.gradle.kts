@@ -3,6 +3,14 @@ val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
 
+tasks.named("build") {
+    dependsOn("stage")
+}
+
+tasks {
+    create("stage").dependsOn("installDist")
+}
+
 plugins {
     application
     distribution
@@ -32,6 +40,3 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
 
-tasks {
-    create("stage").dependsOn("installDist")
-}
