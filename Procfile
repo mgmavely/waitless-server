@@ -1,1 +1,1 @@
-web: ./build/install/waitless-server/bin/waitless-server
+web: build/install/waitless-server/bin/waitless-server
