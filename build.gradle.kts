@@ -19,6 +19,7 @@ plugins {
     distribution
     kotlin("jvm") version "1.9.23"
     id("io.ktor.plugin") version "2.3.9"
+    kotlin("plugin.serialization") version "1.5.0"
 }
 
 group = "com.example"
@@ -88,5 +89,8 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:gotrue-kt")
     implementation("io.github.jan-tennert.supabase:serializer-jackson")
+
+    // serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
 }
 
