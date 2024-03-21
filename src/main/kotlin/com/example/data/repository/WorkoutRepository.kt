@@ -3,7 +3,6 @@ package com.example.server.data.repository
 import com.example.models.entities.ExerciseService.Exercise
 import com.example.models.entities.ExposedExercise
 import com.example.server.models.entities.ExposedWorkout
-import com.example.server.models.entities.ExposedWorkoutExercise
 import com.example.server.models.entities.WorkoutExerciseService.WorkoutExercise
 import com.example.server.models.entities.WorkoutService.Workout
 import kotlinx.serialization.Serializable
@@ -67,11 +66,12 @@ class WorkoutRepository {
 
     @Serializable
     data class WorkoutNameWithId(val name: String, val id: Int)
-    fun readWorkoutsByUser(userId: Int): List<WorkoutNameWithId> {
+    fun readWorkoutsByUser(userId: Int): List<WorkoutWithExercises?> {
         return transaction {
             Workout.select { Workout.user eq userId }
                 .map { row ->
-                    WorkoutNameWithId(row[Workout.name], row[Workout.id].value)
+                    val workoutId = row[Workout.id].value
+                    readWorkout(workoutId)
                 }
         }
     }
