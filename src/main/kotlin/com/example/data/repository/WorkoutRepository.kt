@@ -1,9 +1,12 @@
 package com.example.server.data.repository
 
+import com.example.models.entities.ExerciseService.Exercise
+import com.example.models.entities.ExposedExercise
 import com.example.server.models.entities.ExposedWorkout
 import com.example.server.models.entities.ExposedWorkoutExercise
 import com.example.server.models.entities.WorkoutExerciseService.WorkoutExercise
 import com.example.server.models.entities.WorkoutService.Workout
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -29,18 +32,50 @@ class WorkoutRepository {
         }
     }
 
-    fun readWorkout(workoutId: Int): List<ExposedWorkoutExercise> {
+    @Serializable
+    data class WorkoutWithExercises(val name: String, val exercises: List<ExposedExercise>)
+    fun readWorkout(workoutId: Int): WorkoutWithExercises? {
         return transaction {
-            WorkoutExercise.select {
-                (WorkoutExercise.workout eq workoutId)
-            }.map {
-                ExposedWorkoutExercise(
-                    it[WorkoutExercise.workout].value,
-                    it[WorkoutExercise.exercise].value
+            (WorkoutExercise innerJoin Exercise innerJoin Workout)
+                .slice(
+                    Workout.name,
+                    Exercise.id,
+                    Exercise.name,
+                    Exercise.description,
+                    Exercise.totalNumberOfMachines,
+                    Exercise.numberOfMachinesAvailable,
+                    Exercise.gymId,
+                    Exercise.queueSize
                 )
-            }
+                .select { WorkoutExercise.workout eq workoutId }
+                .groupBy({ it[Workout.name] }) { row ->
+                    ExposedExercise(
+                        row[Exercise.name],
+                        row[Exercise.description],
+                        row[Exercise.totalNumberOfMachines],
+                        row[Exercise.numberOfMachinesAvailable],
+                        row[Exercise.gymId].value,
+                        row[Exercise.queueSize],
+                    )
+                }
+                .map { (workoutName, exercises) ->
+                    WorkoutWithExercises(workoutName, exercises)
+                }.firstOrNull()
         }
     }
+
+
+    @Serializable
+    data class WorkoutNameWithId(val name: String, val id: Int)
+    fun readWorkoutsByUser(userId: Int): List<WorkoutNameWithId> {
+        return transaction {
+            Workout.select { Workout.user eq userId }
+                .map { row ->
+                    WorkoutNameWithId(row[Workout.name], row[Workout.id].value)
+                }
+        }
+    }
+
     fun updateWorkout(workoutId: Int, workout: ExposedWorkout, exercises: List<Int>) {
         transaction {
             // Update workout
@@ -65,7 +100,7 @@ class WorkoutRepository {
     fun deleteWorkout(workoutId: Int) {
         transaction {
             // Delete associated workout exercises
-            WorkoutExercise.deleteWhere { WorkoutExercise.workout eq workoutId }
+            WorkoutExercise.deleteWhere { workout eq workoutId }
 
             // Delete workout
             Workout.deleteWhere { Workout.id eq workoutId }

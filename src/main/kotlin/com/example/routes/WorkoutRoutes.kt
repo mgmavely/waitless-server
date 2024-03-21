@@ -52,7 +52,26 @@ fun Route.workoutRoutes() {
             val workoutId = call.parameters["workout_id"]?.toIntOrNull()
                 ?: throw IllegalArgumentException("Invalid Workout ID")
             val workout = workoutRepository.readWorkout(workoutId)
-            call.respond(HttpStatusCode.OK, workout)
+            if (workout != null) {
+                call.respond(HttpStatusCode.OK, workout)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "Workout not found")
+            }
+        }
+    }
+
+    //Read users workouts
+    get("workouts/user/{user_id}") {
+        val supabase = SupabaseClient.supabase
+        val session = supabase.auth.currentSessionOrNull()
+        if (session === null) {
+            call.respond(HttpStatusCode.InternalServerError, "You must login before you can use this endpoint")
+        } else {
+            val userId = call.parameters["user_id"]?.toIntOrNull()
+                ?: throw IllegalArgumentException("Invalid User ID")
+
+            val workouts = workoutRepository.readWorkoutsByUser(userId)
+            call.respond(HttpStatusCode.OK, workouts)
         }
     }
 
