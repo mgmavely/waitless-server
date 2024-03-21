@@ -1,44 +1,80 @@
-package com.example.data.repository
+package com.example.server.data.repository
 
-import com.example.models.entities.WorkoutService.Workout
-import com.example.models.entities.ExposedWorkout
-import org.jetbrains.exposed.sql.*
+import com.example.server.models.entities.ExposedWorkout
+import com.example.server.models.entities.ExposedWorkoutExercise
+import com.example.server.models.entities.WorkoutExerciseService.WorkoutExercise
+import com.example.server.models.entities.WorkoutService.Workout
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 
 class WorkoutRepository {
-    fun createWorkout(workout: ExposedWorkout) {
-        return transaction {
-            Workout.insert {
-                it[name] = workout.name
-            } get Workout.id
-        }
-    }
-
-    fun readUser(id: Int): ExposedWorkout? {
-        return transaction {
-            Workout.select { Workout.id eq id }
-                .mapNotNull { toExposedWorkout(it) }
-                .singleOrNull()
-        }
-    }
-
-    fun updateWorkout(id: Int, workout: ExposedWorkout) {
+    fun createWorkout(workout: ExposedWorkout, exercises: List<Int>) {
         transaction {
-            Workout.update({ Workout.id eq id }) {
-                it[name] = Workout.name
+            val workoutId = Workout.insert {
+                it[name] = workout.name
+                it[user] = workout.user
+            } get Workout.id
+
+            exercises.forEach { exercise ->
+                WorkoutExercise.insert {
+                    it[this.workout] = workoutId
+                    it[this.exercise] = exercise
+                }
             }
         }
     }
 
-    fun deleteWorkout(id: Int) {
+    fun readWorkout(workoutId: Int): List<ExposedWorkoutExercise> {
+        return transaction {
+            WorkoutExercise.select {
+                (WorkoutExercise.workout eq workoutId)
+            }.map {
+                ExposedWorkoutExercise(
+                    it[WorkoutExercise.workout].value,
+                    it[WorkoutExercise.exercise].value
+                )
+            }
+        }
+    }
+    fun updateWorkout(workoutId: Int, workout: ExposedWorkout, exercises: List<Int>) {
         transaction {
-            Workout.deleteWhere { Workout.id eq id }
+            // Update workout
+            Workout.update({ Workout.id eq workoutId }) {
+                it[name] = workout.name
+                it[user] = workout.user
+            }
+
+            // Delete existing workout exercises
+            WorkoutExercise.deleteWhere { WorkoutExercise.workout eq workoutId }
+
+            // Insert updated workout exercises
+            exercises.forEach { exercise ->
+                WorkoutExercise.insert {
+                    it[this.workout] = workoutId
+                    it[this.exercise] = exercise
+                }
+            }
+        }
+    }
+
+    fun deleteWorkout(workoutId: Int) {
+        transaction {
+            // Delete associated workout exercises
+            WorkoutExercise.deleteWhere { WorkoutExercise.workout eq workoutId }
+
+            // Delete workout
+            Workout.deleteWhere { Workout.id eq workoutId }
         }
     }
 
     private fun toExposedWorkout(row: ResultRow): ExposedWorkout =
         ExposedWorkout(
-            name = row[Workout.name]
+            name = row[Workout.name],
+            user = row[Workout.user].value
         )
 }

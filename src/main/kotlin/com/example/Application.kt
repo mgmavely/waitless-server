@@ -10,6 +10,7 @@ import com.example.routes.authRoutes
 import com.example.routes.exerciseRoutes
 import com.example.routes.gymRoutes
 import com.example.routes.userRoutes
+import com.example.server.routes.workoutRoutes
 import com.example.utils.EnvUtils.getEnvVariable
 
 fun main() {
@@ -28,5 +29,6 @@ fun Application.module() {
         exerciseRoutes()
         authRoutes()
         gymRoutes()
+        workoutRoutes()
     }
 }

@@ -1,13 +1,15 @@
-package com.example.models.entities
+package com.example.server.models.entities
 
-import org.jetbrains.exposed.sql.transactions.transaction
-import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.*
-import com.example.models.entities.WorkoutService.Workout
 import com.example.models.entities.ExerciseService.Exercise
+import com.example.server.models.entities.WorkoutService.Workout
+import kotlinx.serialization.Serializable
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.transactions.transaction
 
 @Serializable
-data class ExposedWorkoutExercise(val user: Int, val workout: Int)
+data class ExposedWorkoutExercise(val workout: Int, val exercise: Int)
 class WorkoutExerciseService(private val database: Database) {
     // Many-to-Many relationship table between Workout and Exercise
     object WorkoutExercise: Table() {

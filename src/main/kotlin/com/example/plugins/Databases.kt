@@ -6,6 +6,8 @@ import com.example.models.entities.GymService
 import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
 import com.example.models.entities.UserService
+import com.example.server.models.entities.WorkoutExerciseService
+import com.example.server.models.entities.WorkoutService
 import org.jetbrains.exposed.sql.transactions.transaction
 import com.example.utils.EnvUtils.getEnvVariable
 
@@ -26,5 +28,7 @@ fun Application.configureDatabases() {
         ExerciseService(database = database)
         GymService(database = database)
         GymAdminService(database = database)
+        WorkoutService(database = database)
+        WorkoutExerciseService(database = database)
     }
 }
