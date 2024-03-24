@@ -1,4 +1,4 @@
-package com.example.server.routes
+package com.example.routes
 
 import com.example.plugins.SupabaseClient
 import com.example.server.data.repository.WorkoutRepository

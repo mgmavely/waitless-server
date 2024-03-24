@@ -2,6 +2,7 @@ package com.example.data.repository
 
 import com.example.models.entities.UserService.User
 import com.example.models.entities.ExposedUser
+import com.example.routes.CreateSessionRequest
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -27,11 +28,29 @@ class UserRepository {
         }
     }
 
+    fun readUserByAuthId(authId: String): CreateSessionRequest? {
+        return transaction {
+            User.select { User.authId eq authId }
+                .mapNotNull { CreateSessionRequest(it[User.name], it[User.email], it[User.password]) }
+                .singleOrNull()
+        }
+    }
+
     fun updateUser(id: Int, user: ExposedUser) {
         transaction {
             User.update({ User.id eq id }) {
                 it[name] = user.name
                 it[email] = user.email
+            }
+        }
+    }
+
+    fun updateUserByAuthId(authId: String, user: CreateSessionRequest) {
+        transaction {
+            User.update({ User.authId eq authId }) {
+                it[name] = user.name
+                it[email] = user.email
+                it[password] = user.password
             }
         }
     }
