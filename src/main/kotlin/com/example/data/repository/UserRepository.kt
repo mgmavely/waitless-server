@@ -1,12 +1,24 @@
 package com.example.data.repository
 
-import com.example.models.entities.UserService.User
 import com.example.models.entities.ExposedUser
-import com.example.routes.CreateSessionRequest
+import com.example.models.entities.UserService.User
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+
+@Serializable
+data class CreateSessionResponse(
+    var name: String,
+    var email: String,
+    var password: String,
+    var id: Int
+)
 
 class UserRepository {
     fun createUser(authId: String, name: String, email: String, password: String): EntityID<Int> {
@@ -28,10 +40,10 @@ class UserRepository {
         }
     }
 
-    fun readUserByAuthId(authId: String): CreateSessionRequest? {
+    fun readUserByAuthId(authId: String): CreateSessionResponse? {
         return transaction {
             User.select { User.authId eq authId }
-                .mapNotNull { CreateSessionRequest(it[User.name], it[User.email], it[User.password]) }
+                .mapNotNull { CreateSessionResponse(it[User.name], it[User.email], it[User.password], it[User.id].value) }
                 .singleOrNull()
         }
     }
@@ -45,7 +57,7 @@ class UserRepository {
         }
     }
 
-    fun updateUserByAuthId(authId: String, user: CreateSessionRequest) {
+    fun updateUserByAuthId(authId: String, user: CreateSessionResponse) {
         transaction {
             User.update({ User.authId eq authId }) {
                 it[name] = user.name
