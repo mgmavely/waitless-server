@@ -1,9 +1,7 @@
 package com.example.routes
 
 import com.example.data.repository.UserRepository
-import com.example.models.entities.ExposedUser
 import com.example.plugins.SupabaseClient
-import com.example.server.models.entities.ExposedWorkout
 import io.github.jan.supabase.gotrue.auth
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -42,19 +40,20 @@ fun Route.sessionRoutes() {
         val user = userRepository.readUserByAuthId(currentUser.id)
         if (user !== null) {
             val request = call.receive<CreateSessionRequest>()
-            if (request.email !== "") {
+            if (request.email.isNotEmpty()) {
+                println()
                 user.email = request.email
                 supabase.auth.modifyUser {
                     email = request.email
                 }
-            } else if (request.name !== "") {
+            } else if (request.name.isNotEmpty()) {
                 user.name = request.name
                 supabase.auth.modifyUser {
                     data {
                         put("name", request.name)
                     }
                 }
-            } else if (request.password !== "") {
+            } else if (request.password.isNotEmpty()) {
                 user.password = request.password
                 supabase.auth.modifyUser {
                     password = request.password
