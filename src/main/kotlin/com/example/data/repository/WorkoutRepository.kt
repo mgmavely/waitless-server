@@ -56,6 +56,10 @@ class WorkoutRepository {
                         row[Exercise.numberOfMachinesAvailable],
                         row[Exercise.gymId].value,
                         row[Exercise.queueSize],
+                        row[Exercise.targetMuscleGroup],
+                        row[Exercise.formDescription],
+                        row[Exercise.workingStatus],
+                        row[Exercise.formVisual]
                     )
                 }
                 .map { (workoutName, exercises) ->
@@ -63,10 +67,6 @@ class WorkoutRepository {
                 }.firstOrNull()
         }
     }
-
-
-    @Serializable
-    data class WorkoutNameWithId(val name: String, val id: Int)
     fun readWorkoutsByUser(userId: Int): List<WorkoutWithExercises?> {
         return transaction {
             Workout.select { Workout.user eq userId }
@@ -107,10 +107,4 @@ class WorkoutRepository {
             Workout.deleteWhere { Workout.id eq workoutId }
         }
     }
-
-    private fun toExposedWorkout(row: ResultRow): ExposedWorkout =
-        ExposedWorkout(
-            name = row[Workout.name],
-            user = row[Workout.user].value
-        )
 }
