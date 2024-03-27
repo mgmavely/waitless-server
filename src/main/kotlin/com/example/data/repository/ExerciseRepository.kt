@@ -17,6 +17,10 @@ class ExerciseRepository {
                 it[numberOfMachinesAvailable] = exercise.numberOfMachinesAvailable
                 it[gymId] = exercise.gymId
                 it[queueSize] = exercise.queueSize
+                it[targetMuscleGroup] = exercise.targetMuscleGroup
+                it[formDescription] = exercise.formDescription
+                it[workingStatus] = exercise.workingStatus
+                it[formVisual] = exercise.formVisual
             } get Exercise.id
         }
     }
@@ -44,6 +48,10 @@ class ExerciseRepository {
                 it[numberOfMachinesAvailable] = exercise.numberOfMachinesAvailable
                 it[this.gymId] = exercise.gymId
                 it[queueSize] = exercise.queueSize
+                it[targetMuscleGroup] = exercise.targetMuscleGroup
+                it[formDescription] = exercise.formDescription
+                it[workingStatus] = exercise.workingStatus
+                it[formVisual] = exercise.formVisual
             }
         }
     }
@@ -61,6 +69,10 @@ class ExerciseRepository {
             totalNumberOfMachines = row[Exercise.totalNumberOfMachines],
             numberOfMachinesAvailable = row[Exercise.numberOfMachinesAvailable],
             gymId = row[Exercise.gymId].value,
-            queueSize = row[Exercise.queueSize]
+            queueSize = row[Exercise.queueSize],
+            targetMuscleGroup = row[Exercise.targetMuscleGroup],
+            formDescription = row[Exercise.formDescription],
+            workingStatus = row[Exercise.workingStatus],
+            formVisual = row[Exercise.formVisual]
         )
 }
