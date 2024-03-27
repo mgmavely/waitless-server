@@ -55,6 +55,7 @@ class ExerciseRepository {
 
     private fun toExposedExercise(row: ResultRow): ExposedExercise =
         ExposedExercise(
+            id = row[Exercise.id].value,
             name = row[Exercise.name],
             description = row[Exercise.description],
             totalNumberOfMachines = row[Exercise.totalNumberOfMachines],

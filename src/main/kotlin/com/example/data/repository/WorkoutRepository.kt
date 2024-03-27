@@ -49,6 +49,7 @@ class WorkoutRepository {
                 .select { WorkoutExercise.workout eq workoutId }
                 .groupBy({ it[Workout.name] }) { row ->
                     ExposedExercise(
+                        row[Exercise.id].value,
                         row[Exercise.name],
                         row[Exercise.description],
                         row[Exercise.totalNumberOfMachines],
