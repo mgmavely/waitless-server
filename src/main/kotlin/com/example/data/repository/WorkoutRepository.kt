@@ -44,7 +44,11 @@ class WorkoutRepository {
                     Exercise.totalNumberOfMachines,
                     Exercise.numberOfMachinesAvailable,
                     Exercise.gymId,
-                    Exercise.queueSize
+                    Exercise.queueSize,
+                    Exercise.targetMuscleGroup,
+                    Exercise.formDescription,
+                    Exercise.workingStatus,
+                    Exercise.formVisual
                 )
                 .select { WorkoutExercise.workout eq workoutId }
                 .groupBy({ it[Workout.name] }) { row ->
@@ -67,6 +71,7 @@ class WorkoutRepository {
                 }.firstOrNull()
         }
     }
+
     fun readWorkoutsByUser(userId: Int): List<WorkoutWithExercises?> {
         return transaction {
             Workout.select { Workout.user eq userId }
