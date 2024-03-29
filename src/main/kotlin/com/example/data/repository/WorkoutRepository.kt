@@ -6,7 +6,6 @@ import com.example.server.models.entities.ExposedWorkout
 import com.example.server.models.entities.WorkoutExerciseService.WorkoutExercise
 import com.example.server.models.entities.WorkoutService.Workout
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -32,11 +31,12 @@ class WorkoutRepository {
     }
 
     @Serializable
-    data class WorkoutWithExercises(val name: String, val exercises: List<ExposedExercise>)
+    data class WorkoutWithExercises(val id: Int, val name: String, val exercises: List<ExposedExercise>)
     fun readWorkout(workoutId: Int): WorkoutWithExercises? {
         return transaction {
             (WorkoutExercise innerJoin Exercise innerJoin Workout)
                 .slice(
+                    Workout.id,
                     Workout.name,
                     Exercise.id,
                     Exercise.name,
@@ -51,7 +51,7 @@ class WorkoutRepository {
                     Exercise.formVisual
                 )
                 .select { WorkoutExercise.workout eq workoutId }
-                .groupBy({ it[Workout.name] }) { row ->
+                .groupBy({ it[Workout.id].value to it[Workout.name] }) { row ->
                     ExposedExercise(
                         row[Exercise.id].value,
                         row[Exercise.name],
@@ -66,8 +66,9 @@ class WorkoutRepository {
                         row[Exercise.formVisual]
                     )
                 }
-                .map { (workoutName, exercises) ->
-                    WorkoutWithExercises(workoutName, exercises)
+                .map { (workoutIdName, exercises) ->
+                    val (id, name) = workoutIdName
+                    WorkoutWithExercises(id, name, exercises)
                 }.firstOrNull()
         }
     }
